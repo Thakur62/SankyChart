@@ -1,0 +1,3 @@
+source_tbl,target_tbl,weight
+Layer_1,Layer_ch,1
+Layer_1,Layer_o,1

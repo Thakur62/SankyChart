@@ -1,0 +1,155 @@
+
+google.charts.load("current", {packages:["sankey"]});
+
+
+function handleFiles(files) {
+	// Check for the various File API support.
+	if (window.FileReader) {
+		// FileReader are supported.
+		getAsText(files[0]);
+	} else {
+		alert('FileReader are not supported in this browser.');
+	}
+}
+
+function getAsText(fileToRead) {
+	var reader = new FileReader();
+	// Handle errors load
+	reader.onload = loadHandler;
+	reader.onerror = errorHandler;
+	// Read file into memory as UTF-8      
+	reader.readAsText(fileToRead);
+}
+
+function loadHandler(event) {
+	var csv = event.target.result;
+	processData(csv);             
+}
+
+function processData(csv) {
+    var allTextLines = csv.split(/\r\n|\n/);
+    var lines = [];
+    while (allTextLines.length) {
+        lines.push(allTextLines.shift().split(','));
+    }
+   updateChart(lines)
+//    drawChart(lines);
+//    drawChart(lines)
+	/*console.log(lines);*/
+	drawOutput(lines);
+}
+
+
+
+function errorHandler(evt) {
+	if(evt.target.error.name == "NotReadableError") {
+		alert("Canno't read file !");
+	}
+}
+
+function drawOutput(lines){
+	//Clear previous data
+	document.getElementById("output").innerHTML = "";
+	var table = document.createElement("table");
+	for (var i = 0; i < lines.length; i++) {
+		var row = table.insertRow(-1);
+		for (var j = 0; j < lines[i].length; j++) {
+			var firstNameCell = row.insertCell(-1);
+			firstNameCell.appendChild(document.createTextNode(lines[i][j]));
+		}
+	}
+	document.getElementById("output").appendChild(table);
+}
+
+function drawChart(lines) {
+	alert("Draw chart gets called >>>>>>" + lines);
+	 var data = new google.visualization.DataTable();
+
+	 var numRows = lines.length;
+     var numCols = lines[0].length;
+     console.log("Row count" + numRows);
+     console.log("Column count" + numCols);
+     console.log("test value" + lines[0][0]);
+     
+     for (var i = 1; i < numCols; i++){
+    	 data.addColumn('string', lines[0][i]);
+     }
+     
+    /*data.addColumn('string', 'From');
+    data.addColumn('string', 'To');
+    data.addColumn('number', 'Weight');*/
+//    data.addRows([lines])
+    /*data.addRows([
+       [ 'Brazil', 'Portugal', 5 ],
+       [ 'Brazil', 'France', 1 ],
+       [ 'Brazil', 'Spain', 1 ],
+       [ 'Brazil', 'England', 1 ]
+       ]);*/
+
+    // Set chart options
+    var options = {
+      width: 600,
+    };
+
+    // Instantiate and draw our chart, passing in some options.
+    var chart = new google.visualization.Sankey(document.getElementById('sankey_multiple'));
+    chart.draw(data, options);
+   }
+
+
+function updateChart(lines) {
+
+	console.log("update chart method gets called")
+    dataTable = new google.visualization.DataTable();
+//	var newData = lines;
+	console.log("lines in the console ")
+	var newData = [['Year', 'Sales', 'Expenses' , 'Other'],
+        ['2004',  '1000',      400     ,  232   ],
+        ['2005',  '1170',      460    ,  421   ],
+        ['2006',  '660',       1120    ,  4324  ],
+        ['2007',  '1030',      540     ,  4234  ],
+        ['2008',  '1530',      50     ,    234  ]];
+	console.log(" From Newdata" + newData[2][2]);
+	console.log(" From dataTable" + lines[2][2].trim());
+	console.log(" size of the new date" + newData.length);
+	console.log(" size of the dlines" + lines.length);
+
+    // determine the number of rows and columns.
+    var numRows = lines.length;
+    var numCols = lines[0].length;
+
+    // in this case the first column is of type 'string'.
+    dataTable.addColumn('string', newData[0][0]);
+    dataTable.addColumn('string', newData[0][1]);
+    dataTable.addColumn('number', newData[0][2]);
+    dataTable.addColumn('number', newData[0][3]);
+    // all other columns are of type 'number'.
+   /* for (var i = 1; i < numCols; i++)
+      dataTable.addColumn('string', newData[0][i]);  */         
+   /* for (var i = 1; i < numRows; i++){
+    	console.log("Print the cloumn " + lines[i][1]);
+    }*/
+    
+    for (var i = 1; i < numRows; i++){
+    	lines[i][2] = parseInt(lines[i][2]);
+    	lines[i][3] = parseInt(lines[i][3]);
+    	console.log("After the conversion values" + lines[i][2]);
+    }
+
+    // now add the rows.
+	    for (var i = 1; i < numRows; i++) {
+//		console.log("From New Data " + newData[i] + "From CSV file " + lines[i]);
+		dataTable.addRow(lines[i]);
+	}
+
+	var options = {
+		width : 600,
+	};
+
+    // redraw the chart.
+    var chart = new google.visualization.Sankey(document.getElementById('sankey_multiple'));
+    chart.draw(dataTable, options);        
+
+}
+
+
